@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bonc.boot.mapper.PartyMemberMapper">
+    <insert id="addPartyMember">
+        insert into party_member_info (id, party_member_id, party_job_code, party_type_code, auth_other_org, auth_other_org_job, auth_admin, is_valid, create_time, create_by, update_time, update_by)
+            value
+            (#{id}, #{partyMemberId}, #{partyJobCode}, #{partyTypeCode}, #{authOtherOrg}, #{authOtherOrgJob},
+                    #{authAdmin}, #{isValid}, now(), #{createBy}, now(), #{updateBy});
+    </insert>
+    <update id="updatePartyMember" parameterType="com.bonc.boot.model.PartyMember">
+        update party_member_info
+        <set>
+            <if test="partyJobCode != null">
+                party_job_code = #{partyJobCode},
+            </if>
+            <if test="partyTypeCode != null">
+                party_type_code = #{partyTypeCode},
+            </if>
+            <if test="authOtherOrg!=null">
+                auth_other_org = #{authOtherOrg},
+            </if>
+            <if test="authOtherOrgJob != null ">
+                auth_other_org_job = #{authOtherOrgJob},
+            </if>
+            <if test="authAdmin != null">
+                auth_admin = #{authAdmin},
+            </if>
+            <if test="isValid != null">
+                is_valid = #{isValid},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateTime != null">
+                update_time = now(),
+            </if>
+        </set>
+        where party_member_id = #{partyMemberId}
+    </update>
+    <select id="getOAUser" resultType="com.bonc.boot.model.OAUserVo" parameterType="string">
+        select
+        fuser.USERGUID,fuser.DISPLAYNAME,fuser.OUGUID,fou.OUNAME
+        from
+        frame_user fuser
+        left join
+        frame_ou fou
+        on fuser.OUGUID = fou.OUGUID
+        where
+        1=1
+        <if test="memberName != null and memberName != ''">
+            and (fuser.DISPLAYNAME like concat('%',#{memberName},'%'))
+        </if>
+    </select>
+
+    <select id="getPartyMemberByOrg" resultType="com.bonc.boot.model.PartyMemberVo">
+        select
+        puser.id,
+        puser.party_member_id,
+        fuser.DISPLAYNAME,
+        puser.party_job_code,
+        puser.party_type_code,
+        puser.auth_other_org,
+        puser.auth_other_org_job,
+        puser.auth_admin,
+        puser.is_valid,
+        puser.party_org_code
+        from party_member_info puser
+        left join frame_user fuser
+        on puser.party_member_id = fuser.USERGUID
+        where
+        1=1
+
+        and puser.party_org_code = #{partyOrgCode}
+
+        <if test="displayname != null and displayname != ''">
+            and fuser.DISPLAYNAME like CONCAT('%',#{displayname},'%')
+        </if>
+        <if test="partyTypeCode != null and partyTypeCode != ''">
+            and puser.party_type_code = #{partyTypeCode}
+        </if>
+    </select>
+    <select id="getCurrentUserInfo" resultType="com.bonc.boot.model.PartyMemberVo">
+        select
+            puser.id,
+            puser.party_member_id,
+            fuser.DISPLAYNAME,
+            puser.party_job_code,
+            puser.party_type_code,
+            puser.party_org_code,
+            puser.auth_other_org,
+            puser.auth_other_org_job,
+            puser.auth_admin,
+            puser.is_valid
+        from party_member_info puser
+            left join frame_user fuser
+                on puser.party_member_id = fuser.USERGUID
+        where 1 = 1
+              and fuser.LOGINID = #{loginName}
+    </select>
+    <select id="getPartyMemberById" resultType="com.bonc.boot.model.PartyMemberVo">
+        select
+        puser.id,
+        puser.party_member_id,
+        fuser.DISPLAYNAME,
+        puser.party_job_code,
+        puser.party_type_code,
+        puser.auth_other_org,
+        puser.auth_other_org_job,
+        puser.auth_admin,
+        puser.is_valid,
+        puser.party_org_code
+        from party_member_info puser
+        left join frame_user fuser
+        on puser.party_member_id = fuser.USERGUID
+        where
+        1=1
+        <if test="partyMemberId != null and partyMemberId != ''">
+            and puser.party_member_id = #{partyMemberId}
+        </if>
+    </select>
+</mapper>

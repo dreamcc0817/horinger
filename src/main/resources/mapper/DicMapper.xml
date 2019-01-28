@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2014-2016 abel533@gmail.com
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in
+  ~ all copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  ~ THE SOFTWARE.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bonc.boot.mapper.DicMapper">
+
+    <select id="getAllParentCode" resultType="java.lang.String">
+				SELECT
+					dic.parent_code
+				FROM
+					party_dic dic
+					where 1=1
+					<if test="typeCode!=null and typeCode.length>0">
+						and dic.parent_code in
+						<foreach collection="typeCode" index="index" item="id" open="(" separator="," close=")">
+							#{id}
+						</foreach>
+					</if>
+				GROUP BY
+					dic.parent_code
+    </select>
+
+    <select id="getActTypeByParentCode" resultType="java.util.Map" parameterType="java.lang.String">
+    		SELECT
+				dic.type_code AS typeCode,
+				dic.type_name AS typeName
+			FROM
+				party_dic dic
+			WHERE
+				dic.parent_code = #{parentCode}
+    </select>
+</mapper>
